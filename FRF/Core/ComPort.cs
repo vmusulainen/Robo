@@ -20,8 +20,7 @@ namespace Core
 
     public class ComPort
     {
-        private const byte StartByte = 0xFE, MaxCommandDataLength = 254;
-        private SerialPort _port = new SerialPort("COM4", 9600, Parity.None, 8, StopBits.One);
+        private SerialPort _port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
 
         public ComPort()
         {
@@ -56,28 +55,53 @@ namespace Core
             _port.Write(data, 0, data.Length);
         }
 
-        public void SendCommand(byte commandCode, byte[] data)
+        public void SendCommand(Command cmd)
+        {
+            Write(cmd.Create());
+        }
+    }
+
+    public class Command
+    {
+        private byte _code;
+        private byte[] _data;
+        private const byte StartByte = 0xFE;
+        private const byte MaxCommandDataLength = 255 - 4;
+        
+        public Command(byte code, byte[] data)
         {
             if (data.Length > MaxCommandDataLength)
             {
-                throw new Exception("Command data should be " + MaxCommandDataLength + "symbols maximum");
+                throw new Exception("Command data should be " + MaxCommandDataLength + " symbols maximum");
             }
-            
-            byte[] buffer = {StartByte, commandCode, (byte)data.Length};
-            var cmd = Combine(new byte[][] {buffer, data});
-            Write(cmd);
+
+            _code = code;
+            _data = data;
         }
 
-        private byte[] Combine(params byte[][] arrays)
+        public byte[] Create()
         {
-            byte[] rv = new byte[arrays.Sum(a => a.Length)];
-            int offset = 0;
-            foreach (byte[] array in arrays)
+            byte len = (byte)(_data.Length + 4); //start byte, length, crc
+            var command = new byte[len];
+            command[0] = StartByte;
+            command[1] = _code;
+            command[2] = (byte)(len - 4);
+
+            Buffer.BlockCopy(_data, 0, command, 3, _data.Length);
+            command[len - 1] = CalcCRC(command, len-1);
+
+            return command;
+        }
+
+        private byte CalcCRC(byte[] data, int len)
+        {
+            byte crc = 0;
+            for (int i = 0; i < len; i++)
             {
-                System.Buffer.BlockCopy(array, 0, rv, offset, array.Length);
-                offset += array.Length;
+                crc += data[i];
             }
-            return rv;
+
+            return crc;
         }
     }
 }

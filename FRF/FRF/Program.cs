@@ -26,7 +26,8 @@ namespace FRF
                         break;
                     }
 
-                    port.SendCommand(1, GetBytes(str));
+                    var cmd = new Command(10, new byte[] {});
+                    port.SendCommand(cmd);
                 }
                
             }
