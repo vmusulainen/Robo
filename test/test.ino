@@ -8,29 +8,32 @@ byte commandData[maxCommandLength];
 byte commandLen = 0;
 int posInCommand = 0;
 
+const byte COMMAND_STATUS = 0;
 
 void processCommand() {
-  Serial.println("Received command:" );
-  Serial.println(commandCode);
-  //Serial.write(commandData, sizeof(commandData));
-  byte data[] = { 4,5,6 };
-  sendCommand(0xAA, data);
+  //Serial.println("Received command:" );
+  //Serial.println(commandCode);
+  switch (commandCode) {
+      case COMMAND_STATUS:
+          byte data[] = { 4,5,6 };
+          sendCommand(COMMAND_STATUS, data, 3);
+          break;
+  }
 }
 
 byte calcCrc(byte code, byte len, byte* buf) {
   byte crc = startByte;
   crc += code;
   crc += len;
-  for(int i=0;i < commandLen; i++) {
+  for(int i = 0; i < len; i++) {
     crc += buf[i];
   }
 
   return crc;
 }
 
-void sendCommand(byte code, byte *data) {
+void sendCommand(byte code, byte *data, byte len) {
   byte buf[255];
-  byte len = sizeof(data);
   buf[0] = startByte;
   buf[1] = code;
   buf[2] = len;
@@ -51,14 +54,14 @@ void readCommand(int byteCount) {
         case 0:
           //command code
           commandCode = bt;
-          Serial.println("Command code:");
-          Serial.println(commandCode);
+          //Serial.println("Command code:");
+          //Serial.println(commandCode);
           break;
         case 1:
           //command length
           commandLen = bt;
-          Serial.println("Command len:");
-          Serial.println(commandLen);
+          //Serial.println("Command len:");
+          //Serial.println(commandLen);
           break;
         default: 
           //data
@@ -84,7 +87,7 @@ void readCommand(int byteCount) {
       if (bt == startByte) {
         readingCommand = true;
         posInCommand = 0;
-        Serial.println("Start byte found");
+        //Serial.println("Start byte found");
       }
     }
   }
@@ -102,7 +105,7 @@ void loop() {
   int byteCount = Serial.available();
 
   readCommand(byteCount);
-  delay(50);
+  delay(5);
 
   //digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   //delay(500);              // wait for a second

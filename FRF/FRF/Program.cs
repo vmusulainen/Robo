@@ -10,15 +10,18 @@ namespace FRF
 {
     class Program
     {
-        private const byte StartByte = 0xFE;
-
         static void Main(string[] args)
         {
             ComPort port = null;
             try
             {
                 port = new ComPort();
-                while (true)
+                Console.WriteLine("FRF started");
+                var thinker = new Thinker();
+
+                thinker.MainLoop();
+
+                /*while (true)
                 {
                     string str = Console.ReadLine();
                     if (str == "exit")
@@ -26,10 +29,9 @@ namespace FRF
                         break;
                     }
 
-                    var cmd = new Command(10, new byte[] {});
-                    port.SendCommand(cmd);
-                }
-               
+                    port.SendCommand(Commands.Status, new byte[] { });
+                }*/
+
             }
             finally
             {
@@ -40,13 +42,5 @@ namespace FRF
                 
             }
         }
-
-        static byte[] GetBytes(string str)
-        {
-            byte[] bytes = new byte[str.Length * sizeof(char)];
-            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
-        }
-
     }
 }

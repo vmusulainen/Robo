@@ -11,33 +11,106 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.IO.Ports;
+using Core;
 
 namespace Core
 {
-    public class Core
+    class ReadedCommandData
     {
+        public byte Code { get; set; }
+        public byte Len { get; set; }
+        public byte PosInCommand { get; set; }
+        public byte[] Data;
+        public byte Crc { get; set; }
+
+        public ReadedCommandData()
+        {
+            Len = 0;
+            Code = 0;
+            PosInCommand = 0;
+            Data = new byte[ComPort.MaxCommandDataLength];
+            Crc = 0;
+        }
     }
 
     public class ComPort
     {
         private SerialPort _port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
+        public const byte StartByte = 0xFE;
+        public const byte MaxCommandDataLength = 255 - 4;
+        private bool _readingCommand = false;
+        private ReadedCommandData _commandData;
+
+        public delegate void ReceivedCommandHandler(BasicCommand cmd);
+        public event ReceivedCommandHandler ReceivedCommand;
 
         public ComPort()
         {
             _port.Open();
             _port.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
-            // Write a string
-            //_port.Write("Hello World");
-
-            // Write a set of bytes
-            //_port.Write(new byte[] { 0x0A, 0xE2, 0xFF }, 0, 3);
-
         }
 
         private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            // Show all the incoming data in the port's buffer
-            Console.WriteLine(_port.ReadExisting());
+            int bytes = _port.BytesToRead;
+            byte[] buffer = new byte[bytes];
+            _port.Read(buffer, 0, bytes);
+
+            Console.Write("Data received: ");
+            foreach (byte bt in buffer)
+            {
+                Console.Write(bt.ToString("X2"));
+                Console.Write(" ");
+                if (_readingCommand)
+                {
+                    ProcessReadedByte(bt);
+                }
+                else
+                {
+                    if (bt == StartByte)
+                    {
+                        _readingCommand = true;
+                        _commandData = new ReadedCommandData();
+                    }
+                }
+            }
+
+            Console.WriteLine(" ");
+        }
+
+        public void ProcessReadedByte(byte bt)
+        {
+            switch (_commandData.PosInCommand)
+            {
+                case 0:
+                    _commandData.Code = bt;
+                    break;
+                case 1:
+                    _commandData.Len = bt;
+                    break;
+                default:
+                    //data
+                    if (_commandData.PosInCommand < _commandData.Len + 2)
+                    {
+                        _commandData.Data[_commandData.PosInCommand - 2] = bt;
+                    }
+                    break;
+            }
+
+            if (_commandData.PosInCommand == _commandData.Len + 2)
+            {
+                _readingCommand = false;
+                if (bt == CalcCRC(_commandData))
+                {
+                    ProcessCommand(_commandData);
+                }
+                else
+                {
+                    Console.WriteLine("FRF: Wrong CRC");
+                }
+            }
+
+            _commandData.PosInCommand++;
         }
 
         public void Close()
@@ -55,42 +128,33 @@ namespace Core
             _port.Write(data, 0, data.Length);
         }
 
-        public void SendCommand(Command cmd)
-        {
-            Write(cmd.Create());
-        }
-    }
-
-    public class Command
-    {
-        private byte _code;
-        private byte[] _data;
-        private const byte StartByte = 0xFE;
-        private const byte MaxCommandDataLength = 255 - 4;
-        
-        public Command(byte code, byte[] data)
+        public void SendCommand(Commands code, byte[] data)
         {
             if (data.Length > MaxCommandDataLength)
             {
-                throw new Exception("Command data should be " + MaxCommandDataLength + " symbols maximum");
+                throw new Exception("Command's data should be " + MaxCommandDataLength + " bytes maximum");
             }
 
-            _code = code;
-            _data = data;
-        }
-
-        public byte[] Create()
-        {
-            byte len = (byte)(_data.Length + 4); //start byte, length, crc
+            byte len = (byte)(data.Length + 4); //start byte, length, crc
             var command = new byte[len];
             command[0] = StartByte;
-            command[1] = _code;
+            command[1] = (byte)code;
             command[2] = (byte)(len - 4);
 
-            Buffer.BlockCopy(_data, 0, command, 3, _data.Length);
-            command[len - 1] = CalcCRC(command, len-1);
+            Buffer.BlockCopy(data, 0, command, 3, data.Length);
+            command[len - 1] = CalcCRC(command, len - 1);
 
-            return command;
+            Write(command);
+        }
+
+        private byte CalcCRC(ReadedCommandData rcd)
+        {
+            byte crc = CalcCRC(rcd.Data, rcd.Len);
+            crc += StartByte;
+            crc += rcd.Code;
+            crc += rcd.Len;
+
+            return crc;
         }
 
         private byte CalcCRC(byte[] data, int len)
@@ -103,5 +167,18 @@ namespace Core
 
             return crc;
         }
+
+        private void ProcessCommand(ReadedCommandData rcd)
+        {
+            var cmd = BasicCommand.Create((Commands)rcd.Code, rcd.Data);
+            if (ReceivedCommand != null)
+            {
+                ReceivedCommand(cmd);
+            }
+
+            Console.WriteLine("FRF: Received command:" + rcd.Code.ToString());  
+        }
     }
+
+    
 }
