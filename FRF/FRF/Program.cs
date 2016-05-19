@@ -17,8 +17,8 @@ namespace FRF
             {
                 port = new ComPort();
                 Console.WriteLine("FRF started");
-                var thinker = new Thinker();
 
+                var thinker = new Thinker(port);
                 thinker.MainLoop();
 
                 /*while (true)
@@ -29,7 +29,8 @@ namespace FRF
                         break;
                     }
 
-                    port.SendCommand(Commands.Status, new byte[] { });
+                    byte degree = Byte.Parse(str);
+                    port.SendCommand(Commands.Status, new byte[] { degree });
                 }*/
 
             }

@@ -1,3 +1,12 @@
+#include <SoftwareSerial.h>
+
+uint8_t  EnAutCmd[4] = {0x44, 0x02, 0xaa, 0x00};
+uint8_t EnTempCmd[4] = {0x22, 0x00, 0x00, 0x00};
+uint8_t TempData[4];
+unsigned int TempValue = 0;
+unsigned int Degree = 0;
+bool Reverse = false;
+SoftwareSerial sensorPort(2, 3);
 
 byte startByte = 0xfe;
 boolean readingCommand = false;
@@ -9,14 +18,13 @@ byte commandLen = 0;
 int posInCommand = 0;
 
 const byte COMMAND_STATUS = 0;
+const byte COMMAND_ANSWER = 1;
+const byte COMMAND_ERROR = 2;
 
 void processCommand() {
-  //Serial.println("Received command:" );
-  //Serial.println(commandCode);
   switch (commandCode) {
       case COMMAND_STATUS:
-          byte data[] = { 4,5,6 };
-          sendCommand(COMMAND_STATUS, data, 3);
+          SensorCmd(commandData[0]);
           break;
   }
 }
@@ -54,14 +62,10 @@ void readCommand(int byteCount) {
         case 0:
           //command code
           commandCode = bt;
-          //Serial.println("Command code:");
-          //Serial.println(commandCode);
           break;
         case 1:
           //command length
           commandLen = bt;
-          //Serial.println("Command len:");
-          //Serial.println(commandLen);
           break;
         default: 
           //data
@@ -87,17 +91,55 @@ void readCommand(int byteCount) {
       if (bt == startByte) {
         readingCommand = true;
         posInCommand = 0;
-        //Serial.println("Start byte found");
       }
     }
   }
+}
+
+void SensorCmd(byte degree)
+{
+  byte buf[5];
+  EnTempCmd[1] = degree;
+  EnTempCmd[3] = ((EnTempCmd[0] + EnTempCmd[1] + EnTempCmd[2]) & 0xFF);
+  for (int i = 0; i < 4; i++) {
+    sensorPort.write(EnTempCmd[i]);
+  }
+  
+  unsigned long timeStamp = millis();
+  while (sensorPort.available() < 4) {
+    if ((millis() - timeStamp) > 1000 ) {
+      byte errorData[] = {10};
+      sendCommand(COMMAND_ERROR,  errorData, 1);
+      return;
+    }
+  }
+  
+  for (int i = 0; i < 4; i++) {
+    buf[i] = sensorPort.read();
+  }
+ 
+  buf[4] = degree;
+  sendCommand(COMMAND_STATUS, buf, 5);
 }
 
 void setup() {
   // put your setup code here, to run once:\
   pinMode(13, OUTPUT);
   Serial.begin(9600);      //Set Baud Rate
-  Serial.println("Run keyboard control");
+  sensorPort.begin(9600);
+
+  EnAutCmd[3] = ((EnAutCmd[0] + EnAutCmd[1] + EnAutCmd[2]) & 0xFF);
+  initSensor();
+  Serial.println("FRF Initialization completed");
+}
+
+
+void initSensor()
+{
+  int i;
+  for (i = 0; i < 4; i++) {
+    sensorPort.write(EnAutCmd[i]);
+  }
 }
 
 void loop() {
