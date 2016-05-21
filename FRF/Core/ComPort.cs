@@ -41,7 +41,7 @@ namespace Core
         private bool _readingCommand = false;
         private ReadedCommandData _commandData;
 
-        public delegate void ReceivedCommandHandler(BasicCommand cmd);
+        public delegate void ReceivedCommandHandler(BasicResponce cmd);
         public event ReceivedCommandHandler ReceivedCommand;
 
         public ComPort()
@@ -170,7 +170,7 @@ namespace Core
 
         private void ProcessCommand(ReadedCommandData rcd)
         {
-            var cmd = BasicCommand.Create((Commands)rcd.Code, rcd.Data);
+            var cmd = BasicResponce.Create((Commands)rcd.Code, rcd.Data);
             if (ReceivedCommand != null)
             {
                 ReceivedCommand(cmd);

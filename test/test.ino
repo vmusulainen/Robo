@@ -20,6 +20,7 @@ int posInCommand = 0;
 const byte COMMAND_STATUS = 0;
 const byte COMMAND_ANSWER = 1;
 const byte COMMAND_ERROR = 2;
+const byte COMMAND_MOVE = 2;
 
 void processCommand() {
   switch (commandCode) {
@@ -107,8 +108,8 @@ void SensorCmd(byte degree)
   
   unsigned long timeStamp = millis();
   while (sensorPort.available() < 4) {
-    if ((millis() - timeStamp) > 1000 ) {
-      byte errorData[] = {10};
+    if ((millis() - timeStamp) > 2000 ) {
+      byte errorData[] = {0};
       sendCommand(COMMAND_ERROR,  errorData, 1);
       return;
     }
