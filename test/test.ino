@@ -8,6 +8,11 @@ unsigned int Degree = 0;
 bool Reverse = false;
 SoftwareSerial sensorPort(2, 3);
 
+int E1 = 6;     //M1 Speed Control
+int E2 = 9;     //M2 Speed Control
+int M1 = 7;    //M1 Direction Control
+int M2 = 8;    //M1 Direction Control
+
 byte startByte = 0xfe;
 boolean readingCommand = false;
 
@@ -22,12 +27,77 @@ const byte COMMAND_ANSWER = 1;
 const byte COMMAND_ERROR = 2;
 const byte COMMAND_MOVE = 2;
 
+const byte MOVE_FORWARD = 0;
+const byte MOVE_BACKWARD = 1;
+const byte MOVE_TURN_LEFT = 2;
+const byte MOVE_TURN_RIGHT = 3;
+        
 void processCommand() {
   switch (commandCode) {
       case COMMAND_STATUS:
           SensorCmd(commandData[0]);
           break;
+      case COMMAND_MOVE:
+          processMoveCommand();
+          break;
   }
+}
+
+void processMoveCommand() {
+  byte moveCommand = commandData[0];
+  byte moveSpeed = commandData[1];
+  switch (moveCommand) {
+      case MOVE_FORWARD:
+          doMoveForward(moveSpeed);
+          break;
+      case MOVE_BACKWARD:
+          doMoveBackward(moveSpeed);
+          break;
+      case MOVE_TURN_LEFT:
+          doTurnLeft(moveSpeed);
+          break;
+      case MOVE_TURN_RIGHT:
+          doTurnRight(moveSpeed);
+          break;
+  }
+}
+
+void stop(void)                    //Stop
+{
+  digitalWrite(E1, LOW);
+  digitalWrite(E2, LOW);
+}
+
+void doMoveForward(int speed)         //Move forward
+{
+  analogWrite (E1, speed);     //PWM Speed Control
+  digitalWrite(M1, HIGH);
+  analogWrite (E2, speed);
+  digitalWrite(M2, HIGH);
+}
+
+void doMoveBackward(int speed)         //Move backward
+{
+  analogWrite (E1, speed);
+  digitalWrite(M1, LOW);
+  analogWrite (E2, speed);
+  digitalWrite(M2, LOW);
+}
+
+void doTurnLeft(int speed)            //Turn Left
+{
+  analogWrite (E1, speed);
+  digitalWrite(M1, LOW);
+  analogWrite (E2, speed);
+  digitalWrite(M2, HIGH);
+}
+
+void doTurnRight(int speed)            //Turn Right
+{
+  analogWrite (E1, speed);
+  digitalWrite(M1, HIGH);
+  analogWrite (E2, speed);
+  digitalWrite(M2, LOW);
 }
 
 byte calcCrc(byte code, byte len, byte* buf) {
@@ -148,7 +218,7 @@ void loop() {
   int byteCount = Serial.available();
 
   readCommand(byteCount);
-  delay(5);
+  //delay(5);
 
   //digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   //delay(500);              // wait for a second

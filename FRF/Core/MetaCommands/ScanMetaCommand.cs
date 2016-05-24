@@ -18,29 +18,25 @@ namespace Core.MetaCommands
             
         }
 
-        public BasicMetaCommandResult ProcessResponce(BasicResponce cmd)
+        public BasicMetaCommandResult ProcessResponce(BasicResponce rsp)
         {
             if (_step == 0)
             {
                 _step = 1;
-                return new BasicMetaCommandResult(MetaCommandAction.Command, new StatusCommand(_degree));
+                var cmd = new StatusCommand(_degree, 1200);
+                return new BasicMetaCommandResult(MetaCommandAction.Command, cmd);
             }
 
-            if (_step == 1)
-            {
-                _step = 2;
-                Thread.Sleep(1200);
-            }
-
-            if (cmd == null)
+            if (rsp == null)
             {
                 return new BasicMetaCommandResult(MetaCommandAction.Idle);
             }
 
-            if (_step == 2 && _degree < MaxDegree)
+            if (_step == 1 && _degree < MaxDegree)
             {
-                _degree++;
-                return new BasicMetaCommandResult(MetaCommandAction.Command, new StatusCommand(_degree));
+                _degree += 1;
+                var cmd = new StatusCommand(_degree, 50);
+                return new BasicMetaCommandResult(MetaCommandAction.Command, cmd);
             }
            
             return new BasicMetaCommandResult(MetaCommandAction.Done); 

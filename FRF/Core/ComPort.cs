@@ -42,7 +42,7 @@ namespace Core
         private ReadedCommandData _commandData;
 
         public delegate void ReceivedCommandHandler(BasicResponce cmd);
-        public event ReceivedCommandHandler ReceivedCommand;
+        public event ReceivedCommandHandler ReceivedResponce;
 
         public ComPort()
         {
@@ -56,11 +56,11 @@ namespace Core
             byte[] buffer = new byte[bytes];
             _port.Read(buffer, 0, bytes);
 
-            Console.Write("Data received: ");
+            //Console.Write("Data received: ");
             foreach (byte bt in buffer)
             {
-                Console.Write(bt.ToString("X2"));
-                Console.Write(" ");
+                //Console.Write(bt.ToString("X2"));
+                //Console.Write(" ");
                 if (_readingCommand)
                 {
                     ProcessReadedByte(bt);
@@ -75,7 +75,7 @@ namespace Core
                 }
             }
 
-            Console.WriteLine(" ");
+            //Console.WriteLine(" ");
         }
 
         public void ProcessReadedByte(byte bt)
@@ -170,13 +170,14 @@ namespace Core
 
         private void ProcessCommand(ReadedCommandData rcd)
         {
-            var cmd = BasicResponce.Create((Commands)rcd.Code, rcd.Data);
-            if (ReceivedCommand != null)
+            var responce = BasicResponce.Create((Commands)rcd.Code, rcd.Data);
+            if (ReceivedResponce != null)
             {
-                ReceivedCommand(cmd);
+                Console.WriteLine(responce.ToString());
+                ReceivedResponce(responce);
             }
 
-            Console.WriteLine("FRF: Received command:" + rcd.Code.ToString());  
+            //Console.WriteLine("FRF: Received command:" + rcd.Code.ToString());  
         }
     }
 

@@ -48,6 +48,7 @@ namespace Core
         public int DistanceToObstacle { get; set; }
         public ushort SensorPos { get; set; }
         public byte Temperature { get; set; }
+        public byte Degree { get; set; }
 
         public StatusResponce(Commands code, byte[] data) : base(code)
         {
@@ -65,11 +66,13 @@ namespace Core
             {
                 DistanceToObstacle = dst;
             }
+
+            Degree = data[4];
         }
 
         public override string ToString()
         {
-            return String.Format("Status. Temperature: {0}, Distance: {1}", Temperature, DistanceToObstacle);
+            return String.Format("Status. Temperature: {0}, Distance: {1}, Degree: {2}", Temperature, DistanceToObstacle, Degree);
         }
     }
 

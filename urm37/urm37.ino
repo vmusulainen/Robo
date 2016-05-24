@@ -42,7 +42,7 @@ void loop()
     Degree = Degree + 1;
   }
 
-  delay(20);
+  delay(1);
 }
 
 
@@ -61,7 +61,7 @@ void SerialCmd()
   for (i = 0; i < 4; i++) {
     sensorPort.write(EnTempCmd[i]);
   }
-  delay(1000);
+  delay(1);
   while (sensorPort.available() > 0)  //if serial receive any data
   {
     for (i = 0; i < 4; i++) {

@@ -17,10 +17,10 @@ namespace Core.MetaCommands
     class BasicMetaCommandResult
     {
         public MetaCommandAction Action { get; set; }
-        public ICommand Command { get; set; }
+        public BaseCommand Command { get; set; }
         public IMetaCommand MetaCommand { get; set; }
 
-        public BasicMetaCommandResult(MetaCommandAction action, ICommand command = null, IMetaCommand metaCommand = null)
+        public BasicMetaCommandResult(MetaCommandAction action, BaseCommand command = null, IMetaCommand metaCommand = null)
         {
             Action = action;
             Command = command;

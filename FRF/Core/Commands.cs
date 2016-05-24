@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Core
 {
@@ -16,6 +18,7 @@ namespace Core
 
     public enum MoveDirection : byte
     {
+        Stopped = 0xFF,
         Forward = 0,
         Backwards = 1
     };
@@ -27,70 +30,89 @@ namespace Core
     };
 
 
-    interface ICommand
+    class BaseCommand
     {
-         void Execute(ComPort port);
+        protected int Timeout = 0;
+
+        public BaseCommand(int timeout = 0)
+        {
+            Timeout = timeout;
+        }
+
+        public virtual void Execute(ComPort port)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected void Execute(ComPort port, Commands cmd, byte[] data)
+        {
+            port.SendCommand(cmd, data);
+            Thread.Sleep(Timeout);
+        }
     }
 
-    class StatusCommand : ICommand
+    class StatusCommand : BaseCommand
     {
         private byte _degree;
 
-        public StatusCommand(byte degree)
+        public StatusCommand(byte degree, int timeout = 0) : base(timeout)
         {
             _degree = degree;
         }
 
-        public void Execute(ComPort port)
+        public override void Execute(ComPort port)
         {
-            port.SendCommand(Commands.Status, new byte[] { _degree });
+            base.Execute(port, Commands.Status, new byte[] { _degree });
         }
     }
 
-    class MoveCommand : ICommand
+    class MoveCommand : BaseCommand
     {
         private MoveDirection _direction;
         private byte _speed;
 
-        public MoveCommand(MoveDirection directrion, byte speed)
+        public MoveCommand(MoveDirection directrion, byte speed, int timeout = 0)
+            : base(timeout)
         {
             _direction = directrion;
             _speed = speed;
         }
 
-        public void Execute(ComPort port)
+        public override void Execute(ComPort port)
         {
-            port.SendCommand(Commands.Move, new byte[] { (byte)_direction, _speed });
+            base.Execute(port, Commands.Move, new byte[] { (byte)_direction, _speed });
         }
     }
 
-    class TurnCommand : ICommand
+    class TurnCommand : BaseCommand
     {
         private TurnDirection _direction;
         private byte _speed;
 
-        public TurnCommand(TurnDirection directrion, byte speed)
+        public TurnCommand(TurnDirection directrion, byte speed, int timeout = 0)
+            : base(timeout)
         {
             _direction = directrion;
             _speed = speed;
         }
 
-        public void Execute(ComPort port)
+        public override void Execute(ComPort port)
         {
-            port.SendCommand(Commands.Move, new byte[] { (byte)_direction, _speed });
+            base.Execute(port, Commands.Move, new byte[] { (byte)_direction, _speed });
         }
     }
 
-    class StopCommand : ICommand
+    class StopCommand : BaseCommand
     {
-        public StopCommand()
+        public StopCommand(int timeout = 0)
+            : base(timeout)
         {
 
         }
 
-        public void Execute(ComPort port)
+        public override void Execute(ComPort port)
         {
-            port.SendCommand(Commands.Move, new byte[] { (byte)MoveDirection.Backwards, 0 });
+            base.Execute(port, Commands.Move, new byte[] { (byte)MoveDirection.Backwards, 0 });
         }
     }
 }

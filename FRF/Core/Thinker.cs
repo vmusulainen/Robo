@@ -17,12 +17,12 @@ namespace Core
         public Thinker(ComPort port)
         {
             _port = port;
-            _port.ReceivedCommand += PortOnReceivedCommand;
+            _port.ReceivedResponce += PortOnReceivedResponce;
             
             _currentMetaCommand = new ScanMetaCommand();
         }
 
-        private void PortOnReceivedCommand(BasicResponce cmd)
+        private void PortOnReceivedResponce(BasicResponce cmd)
         {
             _responces.Enqueue(cmd);
         }
