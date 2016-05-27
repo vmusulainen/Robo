@@ -8,10 +8,10 @@ unsigned int Degree = 0;
 bool Reverse = false;
 SoftwareSerial sensorPort(2, 3);
 
-int E1 = 6;     //M1 Speed Control
-int E2 = 9;     //M2 Speed Control
-int M1 = 7;    //M1 Direction Control
-int M2 = 8;    //M1 Direction Control
+int E1 = 5;     //M1 Speed Control
+int E2 = 6;     //M2 Speed Control
+int M1 = 4;    //M1 Direction Control
+int M2 = 7;    //M1 Direction Control
 
 byte startByte = 0xfe;
 boolean readingCommand = false;
@@ -25,12 +25,13 @@ int posInCommand = 0;
 const byte COMMAND_STATUS = 0;
 const byte COMMAND_ANSWER = 1;
 const byte COMMAND_ERROR = 2;
-const byte COMMAND_MOVE = 2;
+const byte COMMAND_MOVE = 3;
 
-const byte MOVE_FORWARD = 0;
-const byte MOVE_BACKWARD = 1;
-const byte MOVE_TURN_LEFT = 2;
-const byte MOVE_TURN_RIGHT = 3;
+const byte MOVE_STOP = 0;
+const byte MOVE_FORWARD = 1;
+const byte MOVE_BACKWARD = 2;
+const byte MOVE_TURN_LEFT = 3;
+const byte MOVE_TURN_RIGHT = 4;
         
 void processCommand() {
   switch (commandCode) {
@@ -46,7 +47,17 @@ void processCommand() {
 void processMoveCommand() {
   byte moveCommand = commandData[0];
   byte moveSpeed = commandData[1];
+  
+  /*byte buf[5];
+  buf[4] = moveSpeed;
+  buf[1] = 0;
+  buf[2] = moveSpeed;
+  sendCommand(COMMAND_STATUS, buf, 5);*/
+   
   switch (moveCommand) {
+      case MOVE_STOP:
+          stopMovement();
+          break;
       case MOVE_FORWARD:
           doMoveForward(moveSpeed);
           break;
@@ -62,7 +73,7 @@ void processMoveCommand() {
   }
 }
 
-void stop(void)                    //Stop
+void stopMovement(void)                    //Stop
 {
   digitalWrite(E1, LOW);
   digitalWrite(E2, LOW);

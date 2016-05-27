@@ -35,7 +35,7 @@ namespace Core
 
     public class ComPort
     {
-        private SerialPort _port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
+        private SerialPort _port = new SerialPort("COM4", 9600, Parity.None, 8, StopBits.One);
         public const byte StartByte = 0xFE;
         public const byte MaxCommandDataLength = 255 - 4;
         private bool _readingCommand = false;

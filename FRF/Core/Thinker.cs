@@ -19,7 +19,8 @@ namespace Core
             _port = port;
             _port.ReceivedResponce += PortOnReceivedResponce;
             
-            _currentMetaCommand = new ScanMetaCommand();
+             //_currentMetaCommand = new ScanMetaCommand();
+            _currentMetaCommand = new SimpleMovementMetaCommand();
         }
 
         private void PortOnReceivedResponce(BasicResponce cmd)
@@ -62,22 +63,12 @@ namespace Core
                 Thread.Sleep(1);
             }
 
-            /*byte degree = 0;
-            _port.SendCommand(Commands.Status, new byte[] { degree });
-            while (true)
+            /*while (true)
             {
-                if (_responces.Count > 0)
-                {
-                    var cmd = _responces.Dequeue();
-                    if (cmd.Code == Commands.Status)
-                    {
-                        _port.SendCommand(Commands.Status, new byte[] { degree });
-                        degree++;
-                    }
-                }
-
-                Thread.Sleep(75);
+                var cmd = new MoveCommand(MoveDirection.Forward, 125, 25);
+                cmd.Execute(_port);
             }*/
+
         }
     }
 }

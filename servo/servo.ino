@@ -2,16 +2,16 @@
 
 
 //Standard PWM DC control
-//int E1 = 5;     //M1 Speed Control
-//int E2 = 6;     //M2 Speed Control
-//int M1 = 4;    //M1 Direction Control
-//int M2 = 7;    //M1 Direction Control
+int E1 = 5;     //M1 Speed Control
+int E2 = 6;     //M2 Speed Control
+int M1 = 4;    //M1 Direction Control
+int M2 = 7;    //M1 Direction Control
 
 ///For previous Romeo, please use these pins.
-int E1 = 6;     //M1 Speed Control
-int E2 = 9;     //M2 Speed Control
-int M1 = 7;    //M1 Direction Control
-int M2 = 8;    //M1 Direction Control
+//int E1 = 6;     //M1 Speed Control
+//int E2 = 9;     //M2 Speed Control
+//int M1 = 7;    //M1 Direction Control
+//int M2 = 8;    //M1 Direction Control
 
 byte* command = {};
 
@@ -133,7 +133,11 @@ bool validCommand(int* command)
 
 void loop(void)
 {
-  int byteCount = Serial.available();
+  analogWrite (E1, 100);     //PWM Speed Control
+  digitalWrite(M1, HIGH);
+  analogWrite (E2, 100);
+  digitalWrite(M2, HIGH);
+  /*int byteCount = Serial.available();
 
   for (int i = 0; i < byteCount; i++) {
     command[i] = Serial.print("Readed: ");
@@ -150,7 +154,7 @@ void loop(void)
   else {
     Serial.println("Command is invalid");
     command = {};
-  }
+  }*/
 }
 
 

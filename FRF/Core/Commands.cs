@@ -18,15 +18,15 @@ namespace Core
 
     public enum MoveDirection : byte
     {
-        Stopped = 0xFF,
-        Forward = 0,
-        Backwards = 1
+        Stopped = 0,
+        Forward = 1,
+        Backwards = 2
     };
 
     public enum TurnDirection : byte
     {
-        Left = 2,
-        Right = 3
+        Left = 3,
+        Right = 4
     };
 
 

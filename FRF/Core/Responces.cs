@@ -20,7 +20,9 @@ namespace Core
         static BasicResponce()
         {
             _responcesTypes = new Type[3];
-            _responcesTypes[(byte) Commands.Status] = typeof (StatusResponce);
+            _responcesTypes[(byte)Commands.Status] = typeof(StatusResponce);
+            _responcesTypes[(byte)Commands.Answer] = typeof(BasicResponce);
+            _responcesTypes[(byte)Commands.Error] = typeof(ErrorResponce);
         }
 
         public static BasicResponce Create(Commands code, byte[] data)
