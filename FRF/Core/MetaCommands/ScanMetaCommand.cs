@@ -12,6 +12,8 @@ namespace Core.MetaCommands
         private int _step = 0;
         private byte _degree = 0;
         private const byte MaxDegree = 43;
+        private ushort[] _scanResult = new ushort[43];
+
 
         public ScanMetaCommand()
         {
@@ -32,6 +34,12 @@ namespace Core.MetaCommands
                 return new BasicMetaCommandResult(MetaCommandAction.Idle);
             }
 
+            var scanResponce = rsp as StatusResponce;
+            if (scanResponce != null)
+            {
+                _scanResult[scanResponce.Degree] = scanResponce.DistanceToObstacle;
+            }
+            
             if (_step == 1 && _degree < MaxDegree)
             {
                 _degree += 1;
@@ -40,6 +48,11 @@ namespace Core.MetaCommands
             }
            
             return new BasicMetaCommandResult(MetaCommandAction.Done); 
+        }
+
+        public ushort[] GetScanResult()
+        {
+            return _scanResult;
         }
     }
 }

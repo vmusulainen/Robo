@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands.cs" />
+    <Compile Include="MetaCommands\ExplorerMetaCommand.cs" />
     <Compile Include="MetaCommands\SimpleMovementMetaCommand.cs" />
     <Compile Include="Responces.cs" />
     <Compile Include="ComPort.cs" />

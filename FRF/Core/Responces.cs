@@ -47,7 +47,7 @@ namespace Core
     public class StatusResponce : BasicResponce
     {
         public RobotStatus RobotStatus { get; set; }
-        public int DistanceToObstacle { get; set; }
+        public ushort DistanceToObstacle { get; set; }
         public ushort SensorPos { get; set; }
         public byte Temperature { get; set; }
         public byte Degree { get; set; }
@@ -59,22 +59,54 @@ namespace Core
             int dst = data[1];
             dst = dst << 8;
             dst += data[2];
-
-            if (dst == 65535)
-            {
-                DistanceToObstacle = -1;
-            }
-            else
-            {
-                DistanceToObstacle = dst;
-            }
-
             Degree = data[4];
         }
 
         public override string ToString()
         {
             return String.Format("Status. Temperature: {0}, Distance: {1}, Degree: {2}", Temperature, DistanceToObstacle, Degree);
+        }
+    }
+
+    public class RangeScanResponce : BasicResponce
+    {
+        public ushort[] Distances { get; set; }
+        public byte StartDegree { get; set; }
+        public byte EndDegree { get; set; }
+
+        public RangeScanResponce(Commands code, byte[] data) : base(code)
+        {
+            StartDegree = data[0];
+            EndDegree = data[1];
+
+            Distances = new ushort[data.Length / 2 - 1];
+            for (int i = 2; i < data.Length; i += 2)
+            {
+                ushort dist = data[i];
+                dist = (ushort)(dist << 8);
+                dist += data[i + 1];
+                Distances[i / 2 - 1] = dist;
+            }
+        }
+
+        public override string ToString()
+        {
+            return String.Format("Range scan. From: {0}, To: {1}, Distances: {2}", StartDegree, EndDegree, UshortArrayToString(Distances));
+        }
+
+        private static string UshortArrayToString(ushort[] arr)
+        {
+            StringBuilder hex = new StringBuilder(arr.Length * 5);
+            foreach (ushort el in arr)
+            {
+                byte lb = (byte)el;
+                byte hb = (byte)(el >> 8); 
+                hex.AppendFormat("{0:x2}", hb);
+                hex.AppendFormat("{0:x2}", lb);
+                hex.Append(' ');
+            }
+                
+            return hex.ToString();
         }
     }
 

@@ -13,7 +13,8 @@ namespace Core
         Status = 0,
         Answer = 1,
         Error = 2,
-        Move = 3
+        Move = 3,
+        RangeScan = 4
     };
 
     public enum MoveDirection : byte
@@ -63,6 +64,23 @@ namespace Core
         public override void Execute(ComPort port)
         {
             base.Execute(port, Commands.Status, new byte[] { _degree });
+        }
+    }
+
+    class RangeScanCommand : BaseCommand
+    {
+        private byte _startDegree;
+        private byte _endDegree;
+
+        public RangeScanCommand(byte startDegree, byte endDegree, int timeout = 0) : base(timeout)
+        {
+            _startDegree = startDegree;
+            _endDegree = endDegree;
+        }
+
+        public override void Execute(ComPort port)
+        {
+            base.Execute(port, Commands.RangeScan, new byte[] { _startDegree, _endDegree });
         }
     }
 
