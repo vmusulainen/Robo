@@ -22,10 +22,13 @@ byte commandData[maxCommandLength];
 byte commandLen = 0;
 int posInCommand = 0;
 
+byte scanBuf[5];
+
 const byte COMMAND_STATUS = 0;
 const byte COMMAND_ANSWER = 1;
 const byte COMMAND_ERROR = 2;
 const byte COMMAND_MOVE = 3;
+const byte COMMAND_RANGE_SCAN = 4;
 
 const byte MOVE_STOP = 0;
 const byte MOVE_FORWARD = 1;
@@ -40,6 +43,9 @@ void processCommand() {
           break;
       case COMMAND_MOVE:
           processMoveCommand();
+          break;
+      case COMMAND_RANGE_SCAN:
+          doRangeScan();
           break;
   }
 }
@@ -173,14 +179,14 @@ void readCommand(int byteCount) {
       if (bt == startByte) {
         readingCommand = true;
         posInCommand = 0;
+        commandLen = 0;
       }
     }
   }
 }
 
-void SensorCmd(byte degree)
-{
-  byte buf[5];
+byte* scanSensor(byte degree, bool sendError=false) {
+  //byte buf[5];
   EnTempCmd[1] = degree;
   EnTempCmd[3] = ((EnTempCmd[0] + EnTempCmd[1] + EnTempCmd[2]) & 0xFF);
   for (int i = 0; i < 4; i++) {
@@ -190,18 +196,57 @@ void SensorCmd(byte degree)
   unsigned long timeStamp = millis();
   while (sensorPort.available() < 4) {
     if ((millis() - timeStamp) > 2000 ) {
-      byte errorData[] = {0};
-      sendCommand(COMMAND_ERROR,  errorData, 1);
-      return;
+      if (sendError) {
+        byte errorData[] = {0};
+        sendCommand(COMMAND_ERROR,  errorData, 1);
+      }
+      return NULL;
     }
   }
   
   for (int i = 0; i < 4; i++) {
-    buf[i] = sensorPort.read();
+    scanBuf[i] = sensorPort.read();
   }
  
-  buf[4] = degree;
-  sendCommand(COMMAND_STATUS, buf, 5);
+  scanBuf[4] = degree;
+  return scanBuf;
+}
+
+void SensorCmd(byte degree)
+{
+  byte* buf = scanSensor(degree, true);
+  if (buf) {
+    sendCommand(COMMAND_STATUS, buf, 5);
+  }
+}
+
+void doRangeScan() {
+  byte startDegree = commandData[0];   
+  byte endDegree = commandData[1];
+
+  byte result[90];
+  result[0] = commandData[0];
+  result[1] = commandData[1];
+  
+  int delayTime;
+  byte degree;
+  int len = endDegree - startDegree + 1;
+  for(int i = 0; i < len; i++) {
+    byte* buf = scanSensor(startDegree + i);
+    result[i*2 + 2] = buf[1];
+    result[i*2 + 3] = buf[2];
+    
+    if (i == 0) {
+      delayTime = 1000;
+    }
+    else {
+      delayTime = 5;
+    }
+    
+    delay(delayTime);
+  }
+  
+  sendCommand(COMMAND_RANGE_SCAN, result, len*2+2);
 }
 
 void setup() {

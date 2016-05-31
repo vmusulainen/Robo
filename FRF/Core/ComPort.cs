@@ -28,14 +28,23 @@ namespace Core
             Len = 0;
             Code = 0;
             PosInCommand = 0;
-            Data = new byte[ComPort.MaxCommandDataLength];
             Crc = 0;
+        }
+
+        public void InitData()
+        {
+            if (Len > ComPort.MaxCommandDataLength)
+            {
+                throw new Exception(String.Format("Responce length must be less then {0} bytes", ComPort.MaxCommandDataLength));
+            }
+
+            Data = new byte[Len];
         }
     }
 
     public class ComPort
     {
-        private SerialPort _port = new SerialPort("COM4", 9600, Parity.None, 8, StopBits.One);
+        private SerialPort _port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
         public const byte StartByte = 0xFE;
         public const byte MaxCommandDataLength = 255 - 4;
         private bool _readingCommand = false;
@@ -87,6 +96,7 @@ namespace Core
                     break;
                 case 1:
                     _commandData.Len = bt;
+                    _commandData.InitData();
                     break;
                 default:
                     //data

@@ -19,10 +19,12 @@ namespace Core
 
         static BasicResponce()
         {
-            _responcesTypes = new Type[3];
+            _responcesTypes = new Type[5];
             _responcesTypes[(byte)Commands.Status] = typeof(StatusResponce);
             _responcesTypes[(byte)Commands.Answer] = typeof(BasicResponce);
             _responcesTypes[(byte)Commands.Error] = typeof(ErrorResponce);
+            _responcesTypes[(byte)Commands.Move] = null;
+            _responcesTypes[(byte)Commands.RangeScan] = typeof(RangeScanResponce);
         }
 
         public static BasicResponce Create(Commands code, byte[] data)
@@ -56,9 +58,9 @@ namespace Core
         {
             //RobotStatus = (RobotStatus)data[0];
             Temperature = data[0];
-            int dst = data[1];
-            dst = dst << 8;
-            dst += data[2];
+            DistanceToObstacle = data[1];
+            DistanceToObstacle = (ushort)(DistanceToObstacle << 8);
+            DistanceToObstacle += data[2];
             Degree = data[4];
         }
 
@@ -96,7 +98,7 @@ namespace Core
 
         private static string UshortArrayToString(ushort[] arr)
         {
-            StringBuilder hex = new StringBuilder(arr.Length * 5);
+            var hex = new StringBuilder(arr.Length * 5);
             foreach (ushort el in arr)
             {
                 byte lb = (byte)el;

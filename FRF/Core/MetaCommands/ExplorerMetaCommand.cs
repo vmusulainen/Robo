@@ -19,7 +19,7 @@ namespace Core.MetaCommands
             if (rsp == null)
             {
                 Console.WriteLine("Sending status");
-                var cmd = new StatusCommand(Degree, 200);
+                var cmd = new StatusCommand(10, 200);
                 return new BasicMetaCommandResult(MetaCommandAction.Command, cmd);
             }
 

@@ -30,7 +30,6 @@ namespace Core
         Right = 4
     };
 
-
     class BaseCommand
     {
         protected int Timeout = 0;
@@ -69,13 +68,30 @@ namespace Core
 
     class RangeScanCommand : BaseCommand
     {
+        public const byte MinDegree = 0;
+        public const byte MaxDegree = 43;
+
         private byte _startDegree;
         private byte _endDegree;
 
         public RangeScanCommand(byte startDegree, byte endDegree, int timeout = 0) : base(timeout)
         {
             _startDegree = startDegree;
+            if (_startDegree > MaxDegree)
+            {
+                _startDegree = MaxDegree;
+            }
+
             _endDegree = endDegree;
+            if (_endDegree > MaxDegree)
+            {
+                _endDegree = MaxDegree;
+            }
+
+            if (_startDegree > _endDegree)
+            {
+                throw new Exception("Start degree should be <= end degree");
+            }
         }
 
         public override void Execute(ComPort port)

@@ -30,7 +30,7 @@ namespace Core
 
         public void MainLoop()
         {
-            while (true)
+            /*while (true)
             {
                 BasicResponce responce = null;
                 if (_responces.Count > 0)
@@ -61,13 +61,16 @@ namespace Core
                 }
 
                 Thread.Sleep(1);
-            }
 
-            /*while (true)
-            {
-                var cmd = new MoveCommand(MoveDirection.Forward, 125, 25);
-                cmd.Execute(_port);
+                
             }*/
+
+            while (true)
+            {
+                //var cmd = new RangeScanCommand(0, 43, 3500);
+                var cmd = new StatusCommand(20, 500);
+                cmd.Execute(_port);
+            }
 
         }
     }

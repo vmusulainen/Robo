@@ -21,6 +21,7 @@ namespace FRF
                 var thinker = new Thinker(port);
                 thinker.MainLoop();
 
+                Console.ReadLine();
                 /*while (true)
                 {
                     string str = Console.ReadLine();
