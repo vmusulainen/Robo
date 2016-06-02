@@ -53,7 +53,8 @@ void processCommand() {
 void processMoveCommand() {
   byte moveCommand = commandData[0];
   byte moveSpeed = commandData[1];
-  
+  byte degree = commandData[2];
+  bool stopAfter = (bool)commandData[3];
   /*byte buf[5];
   buf[4] = moveSpeed;
   buf[1] = 0;
@@ -71,12 +72,36 @@ void processMoveCommand() {
           doMoveBackward(moveSpeed);
           break;
       case MOVE_TURN_LEFT:
-          doTurnLeft(moveSpeed);
+          turn(true, degree, moveSpeed, stopAfter);
           break;
       case MOVE_TURN_RIGHT:
           doTurnRight(moveSpeed);
           break;
   }
+}
+
+void turn(bool left, byte degree, byte turnSpeed, bool stopAfter) {
+  float fullTurnTime = 8000;  
+  int delayTime = (degree / 360.0) * fullTurnTime * (float)turnSpeed/255.0;
+  byte turnDirection;
+  
+  if (left) {
+    turnDirection = MOVE_TURN_LEFT;
+    doTurnLeft(turnSpeed);
+  }
+  else {
+    turnDirection = MOVE_TURN_RIGHT;
+    doTurnRight(turnSpeed);
+  }
+
+  delay(delayTime);
+
+  if (stopAfter) {
+    stopMovement();
+  }
+
+  byte answer[] = {COMMAND_MOVE, 0xFF, turnDirection};
+  sendCommand(COMMAND_ANSWER,  answer, 3);
 }
 
 void stopMovement(void)                    //Stop

@@ -21,7 +21,7 @@ namespace Core
         {
             _responcesTypes = new Type[5];
             _responcesTypes[(byte)Commands.Status] = typeof(StatusResponce);
-            _responcesTypes[(byte)Commands.Answer] = typeof(BasicResponce);
+            _responcesTypes[(byte)Commands.Answer] = typeof(AnswerResponce);
             _responcesTypes[(byte)Commands.Error] = typeof(ErrorResponce);
             _responcesTypes[(byte)Commands.Move] = null;
             _responcesTypes[(byte)Commands.RangeScan] = typeof(RangeScanResponce);

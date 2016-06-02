@@ -122,17 +122,21 @@ namespace Core
     {
         private TurnDirection _direction;
         private byte _speed;
+        private byte _degree;
+        private byte _stopAfter;
 
-        public TurnCommand(TurnDirection directrion, byte speed, int timeout = 0)
+        public TurnCommand(TurnDirection directrion, byte degree, byte speed=255, bool stopAfter=true, int timeout = 0)
             : base(timeout)
         {
             _direction = directrion;
             _speed = speed;
+            _degree = degree;
+            _stopAfter = Convert.ToByte(stopAfter);
         }
 
         public override void Execute(ComPort port)
         {
-            base.Execute(port, Commands.Move, new byte[] { (byte)_direction, _speed });
+            base.Execute(port, Commands.Move, new byte[] { (byte)_direction, _speed, _degree, _stopAfter });
         }
     }
 
