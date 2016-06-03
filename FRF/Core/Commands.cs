@@ -70,7 +70,8 @@ namespace Core
     {
         public const byte MinDegree = 0;
         public const byte MaxDegree = 43;
-
+        public const byte CenterDegree = 22;
+        
         private byte _startDegree;
         private byte _endDegree;
 

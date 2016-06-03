@@ -60,28 +60,33 @@ void processMoveCommand() {
   buf[1] = 0;
   buf[2] = moveSpeed;
   sendCommand(COMMAND_STATUS, buf, 5);*/
-   
+
+  byte answer[2] = {COMMAND_MOVE, 0xFF};
   switch (moveCommand) {
       case MOVE_STOP:
           stopMovement();
+          
+          sendCommand(COMMAND_ANSWER, answer, 2);
           break;
       case MOVE_FORWARD:
           doMoveForward(moveSpeed);
+          sendCommand(COMMAND_ANSWER, answer, 2);
           break;
       case MOVE_BACKWARD:
           doMoveBackward(moveSpeed);
+          sendCommand(COMMAND_ANSWER, answer, 2);
           break;
       case MOVE_TURN_LEFT:
           turn(true, degree, moveSpeed, stopAfter);
           break;
       case MOVE_TURN_RIGHT:
-          doTurnRight(moveSpeed);
+          turn(false, degree, moveSpeed, stopAfter);
           break;
   }
 }
 
 void turn(bool left, byte degree, byte turnSpeed, bool stopAfter) {
-  float fullTurnTime = 8000;  
+  float fullTurnTime = 16000;  
   int delayTime = (degree / 360.0) * fullTurnTime * (float)turnSpeed/255.0;
   byte turnDirection;
   
@@ -126,7 +131,7 @@ void doMoveBackward(int speed)         //Move backward
   digitalWrite(M2, LOW);
 }
 
-void doTurnLeft(int speed)            //Turn Left
+void doTurnRight(int speed)            //Turn Left
 {
   analogWrite (E1, speed);
   digitalWrite(M1, LOW);
@@ -134,7 +139,7 @@ void doTurnLeft(int speed)            //Turn Left
   digitalWrite(M2, HIGH);
 }
 
-void doTurnRight(int speed)            //Turn Right
+void doTurnLeft(int speed)            //Turn Right
 {
   analogWrite (E1, speed);
   digitalWrite(M1, HIGH);

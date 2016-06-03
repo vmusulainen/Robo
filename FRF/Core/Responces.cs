@@ -98,14 +98,17 @@ namespace Core
 
         private static string UshortArrayToString(ushort[] arr)
         {
-            var hex = new StringBuilder(arr.Length * 5);
+            var hex = new StringBuilder(arr.Length * 6);
             foreach (ushort el in arr)
             {
-                byte lb = (byte)el;
+                /*byte lb = (byte)el;
                 byte hb = (byte)(el >> 8); 
                 hex.AppendFormat("{0:x2}", hb);
                 hex.AppendFormat("{0:x2}", lb);
-                hex.Append(' ');
+                hex.Append(' ');*/
+
+                hex.Append(el);
+                hex.Append(" ");
             }
                 
             return hex.ToString();
@@ -114,19 +117,18 @@ namespace Core
 
     public class AnswerResponce : BasicResponce
     {
-        public byte Command { get; set; }
         public byte ErorCode { get; set; }
 
         public AnswerResponce(Commands code, byte[] data)
             : base(code)
         {
-            Command = data[0];
+            Code = (Commands)data[0];
             ErorCode = data[1];
         }
 
         public override string ToString()
         {
-            return String.Format("Answer. To command: {0}, ErrorCode: {1}", Command, ErorCode);
+            return String.Format("Answer. To command: {0}, ErrorCode: {1}", Code, ErorCode);
         }
     }
 

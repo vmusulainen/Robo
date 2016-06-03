@@ -19,8 +19,9 @@ namespace Core
             _port = port;
             _port.ReceivedResponce += PortOnReceivedResponce;
             
-             //_currentMetaCommand = new ScanMetaCommand();
-            _currentMetaCommand = new SimpleMovementMetaCommand();
+            //_currentMetaCommand = new ScanMetaCommand();
+            //_currentMetaCommand = new SimpleMovementMetaCommand();
+            _currentMetaCommand = new ExplorerMetaCommand();
         }
 
         private void PortOnReceivedResponce(BasicResponce cmd)
@@ -30,7 +31,7 @@ namespace Core
 
         public void MainLoop()
         {
-            /*while (true)
+            while (true)
             {
                 BasicResponce responce = null;
                 if (_responces.Count > 0)
@@ -61,19 +62,18 @@ namespace Core
                 }
 
                 Thread.Sleep(1);
-
-                
-            }*/
-            
-            //var cmd = new TurnCommand(TurnDirection.Left, 90, 255, true, 500);
-            //cmd.Execute(_port);
-
-            while (true)
-            {
-                var cmd = new RangeScanCommand(0, 43, 3500);
-                //var cmd = new StatusCommand(20, 500);
-                cmd.Execute(_port);
+               
             }
+            
+            /*var cmd = new TurnCommand(TurnDirection.Left, 180, 255, true, 500);
+            cmd.Execute(_port);*/
+
+            /*while (true)
+            {
+                //var cmd = new RangeScanCommand(11, 11, 3500);
+                var cmd = new StatusCommand(11, 500);
+                cmd.Execute(_port);
+            }*/
 
         }
     }
